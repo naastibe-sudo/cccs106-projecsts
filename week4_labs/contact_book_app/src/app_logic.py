@@ -2,10 +2,29 @@
 import flet as ft
 from database import update_contact_db, delete_contact_db, add_contact_db, get_all_contacts_db
 
+db_conn_global = None
+contacts_list_view_global = None
+
+
+def make_edit_handler(contact):
+    return lambda e: open_edit_dialog(
+        e.page, contact, db_conn_global, contacts_list_view_global
+    )
+
+def make_delete_handler(contact_id):
+    return lambda e: delete_contact(
+        e.page, contact_id, db_conn_global, contacts_list_view_global
+    )
+
+
 # --- CONTACT LOGIC FUNCTIONS ---
 
 def display_contacts(page, contacts_list_view, db_conn, search=""):
     """Fetches and displays all contacts in the ListView."""
+    global db_conn_global, contacts_list_view_global
+    db_conn_global = db_conn
+    contacts_list_view_global = contacts_list_view
+
     contacts_list_view.controls.clear()
     contacts = get_all_contacts_db(db_conn, search)
     for contact in contacts:
@@ -22,16 +41,12 @@ def display_contacts(page, contacts_list_view, db_conn, search=""):
                             ft.PopupMenuItem(
                                 text="Edit",
                                 icon=ft.Icons.EDIT,
-                                on_click=lambda _, c=contact: open_edit_dialog(
-                                    page, c, db_conn, contacts_list_view
-                                )
+                                on_click=make_edit_handler(contact)
                             ),
                             ft.PopupMenuItem(
                                 text="Delete",
                                 icon=ft.Icons.DELETE,
-                                on_click=lambda _, cid=contact_id: delete_contact(
-                                    page, cid, db_conn, contacts_list_view
-                                )
+                                    on_click=make_delete_handler(contact_id)
                             ),
                         ],
                     ),
@@ -39,6 +54,7 @@ def display_contacts(page, contacts_list_view, db_conn, search=""):
             )
         )
     page.update()
+
 
 
 def add_contact(page, inputs, contacts_list_view, db_conn):
@@ -64,10 +80,11 @@ def delete_contact(page, contact_id, db_conn, contacts_list_view):
     """Asks for confirmation before deleting a contact."""
 
     def confirm_delete(e):
-        dialog.open = False
         delete_contact_db(db_conn, contact_id)
+        dialog.open = False
         display_contacts(page, contacts_list_view, db_conn)
         page.update()
+
 
     dialog = ft.AlertDialog(
         modal=True,
@@ -78,9 +95,8 @@ def delete_contact(page, contact_id, db_conn, contacts_list_view):
             ft.TextButton("Yes", on_click=confirm_delete),
         ],
     )
-    page.dialog = dialog
-    dialog.open = True
-    page.update()
+    page.open(dialog)
+
 
 
 def open_edit_dialog(page, contact, db_conn, contacts_list_view):
@@ -112,6 +128,4 @@ def open_edit_dialog(page, contact, db_conn, contacts_list_view):
             ft.TextButton("Save", on_click=save_and_close),
         ],
     )
-    page.dialog = dialog
-    dialog.open = True
-    page.update()
+    page.open(dialog)
