@@ -3,10 +3,10 @@ Application Development and Emerging Technologies
 Academic Year 2025-2026 
 ECHO is on.
 ## Student Information
-- **Name:** [Your Full Name]
-- **Student ID:** [Your Student ID]
-- **Program:** [Your Program]
-- **Section:** [Your Section]
+- **Name:** Nasser Angelo T. AS=stibe
+- **Student ID:** 231002304
+- **Program:** BSCS
+- **Section:** 2B
 ## Repository Structure 
 - week1_labs/ - Environment setup and Python basics 
 - week2_labs/ - Git and Flet GUI development 
